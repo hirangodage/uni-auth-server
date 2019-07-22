@@ -1,4 +1,8 @@
 from flask import Flask,jsonify, request
+from apis.db import *
+from itertools import groupby
+from functools import reduce
+import operator
 from flask_restplus import Namespace, Resource, fields
 import jwt  , datetime
 import signal,logging,json
@@ -12,21 +16,24 @@ logger = logging.getLogger('auth')
 auth = Namespace('authantication', description='Authatication and authrization for all other modules')
 
 tokenModel = auth.model('requestObject',{
-    'username': fields.String(required=True, description='username that given by the service provider'),
-    'password': fields.String(required=True, description='password that given by the service provider')
+    'username': fields.String(required=True, description='username'),
+    'password': fields.String(required=True, description='password'),
+    'aud': fields.String(required=True, description='audience name')
 })
 
 
-def get_access_token(identity):
+def get_access_token(identity,expin,aud,key,roles):
     payload_access = {
-                        'exp': datetime.datetime.utcnow() + datetime.timedelta(milliseconds=50000),
+                        'exp': datetime.datetime.utcnow() + datetime.timedelta(milliseconds=expin),
                         'iat': datetime.datetime.utcnow(),
                         'nbf': datetime.datetime.utcnow(),
                         'identity': identity,
-                        'aud':['testapp','testapp2'],
-                        "type": "access"
+                        'aud':[aud],
+                        "type": "access",
+                        'roles':roles
                          }
-    access_token = jwt.encode(payload_access, 'test-123', algorithm='HS256')
+                        
+    access_token = jwt.encode(payload_access, key, algorithm='HS256')
     return access_token.decode()
 
 @auth.route('/refresh')
@@ -55,20 +62,43 @@ class tokenServer(Resource):
             reqdata =  request.get_json()
             username =reqdata.get('username')
             password = reqdata.get('password')
+            aud = reqdata.get('aud')
+            logger.info(f'token request for user {username} and aud is {aud}')
 
-           
-            if username == password:
-
-                access_token = get_access_token(username)
-                refresh_token =create_refresh_token(username)
-
-
-                return {'token_type': 'Bearer', 'expires_in': 50000,'access_token': access_token.decode(), 
-                'refresh_token': refresh_token.decode()},200
-            else:
+            userState = checkUser(username,password,aud)
+            if not userState:
+                logger.info(f'invlaid aud for user {username}')
+                return {'message':'invalid audience'},404
+            
+            if userState[0].Status == -1:
+                logger.info(f'incorrect credentials {username}')
                 return {'message':'incorrect username password'},404
+
+
+            grps = groupby(sorted(userState,key=lambda x:(x.Name,x.Email,x.Mobile,x.AudKey,x.Expire)), lambda x:(x.Name,x.Email,x.Mobile,x.AudKey,x.Expire))
+            roles=''
+            audkey=''
+            email=''
+            mobile=''
+            expire =0
+            for k,v in grps:
+                roles = reduce(lambda x,y:x.Role+','+y.Role,list(v))
+                email = k[1]
+                mobile = k[2]
+                audkey = k[3]
+                expire = int(k[4])
+
+            
+            access_token = get_access_token(username,expire,aud,audkey,roles)
+            refresh_token =create_refresh_token(username)
+            logger.info(f'token granted for user {username}')   
+            return {'token_type': 'Bearer', 'expires_in': expire,'access_token': access_token, 
+            'refresh_token': refresh_token},200
+
         except Exception as e:
-            return {'message':e}
+            logger.info('username:'+username+'token request failed. check error log for more details.')
+            logger.error(e)
+            return {'message':'internal server error'},500
             
 
 

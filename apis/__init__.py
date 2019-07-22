@@ -1,13 +1,22 @@
 from flask_restplus import Api
-from apis.Documents import documents
 from apis.Health import health
 from apis.auth import auth
 
-api = Api(version='1.0', title='[product name] API',
-    description='discription about the product',
+
+authorizations = {
+    'apikey': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'authorization',
+        'description': 'Enter your bearer token in the format **Bearer &lt;token>**'
+    }
+}
+api = Api(version='1.0', title='Unicorn authantication API',
+    description='token server',
+    authorizations=authorizations,
+    security='apikey'
 )
 
-api.add_namespace(documents)
 api.add_namespace(health)
 
 
