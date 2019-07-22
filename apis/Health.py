@@ -18,6 +18,8 @@ class MainService(Resource):
       @jwt_required
       def post(self):
             return "working",200
+
+      @jwt_required
       def get(self):
             logger.info('health check get')
             return "working",200

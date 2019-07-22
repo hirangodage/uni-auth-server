@@ -15,7 +15,7 @@ mapp.secret_key = os.getenv('testkey', 'default@health')
 mapp.config['PROPAGATE_EXCEPTIONS'] = True
 
 mapp.config['JWT_SECRET_KEY']=mapp.secret_key
-#mapp.config['JWT_DECODE_AUDIENCE']='testx123'
+mapp.config['JWT_DECODE_AUDIENCE']=os.getenv('testaud', 'test')
 #mapp.config['JWT_ENCODE_AUDIENCE']='testapp'
 api.init_app(mapp)
 
