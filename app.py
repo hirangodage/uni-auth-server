@@ -9,13 +9,13 @@ LOGGINGFORMAT = '%(asctime)-15s %(levelname)-8s %(name)-8s %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=LOGGINGFORMAT, datefmt='%d-%b-%y %H:%M:%S')
 
 mapp=Flask(__name__)
-mapp.secret_key = os.getenv('testkey', 'default@health')
+mapp.secret_key = os.getenv('adminkey', 'test@key')
 
 
 mapp.config['PROPAGATE_EXCEPTIONS'] = True
 
 mapp.config['JWT_SECRET_KEY']=mapp.secret_key
-mapp.config['JWT_DECODE_AUDIENCE']=os.getenv('testaud', 'test')
+mapp.config['JWT_DECODE_AUDIENCE']=os.getenv('adminaud', 'admin')
 #mapp.config['JWT_ENCODE_AUDIENCE']='testapp'
 api.init_app(mapp)
 

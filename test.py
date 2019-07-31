@@ -1,21 +1,7 @@
-import os
-from apis.db import *
-from itertools import groupby
-from functools import reduce
-
-print(os.getenv('testkey', 'default_value'))
 
 
-
-
-lists = checkUser('hiran','test456','test')
-
-grps = groupby(sorted(lists,key=lambda x:(x.Name,x.Email,x.Mobile,x.AudKey)), lambda x:(x.Name,x.Email,x.Mobile,x.AudKey))
-
-for k,v in grps:
-    xxx = list(v)
-    newk= list(k)
-   
-    print(reduce(lambda x,y:x.Role+','+y.Role,xxx))
-    print(newk)
-
+ar=[{'Status': 1, 'Name': 'hiran', 'Email': 'hiran@tl.lk', 'Mobile': '12', 'Role': 'admin',
+ 'aud': 'admin', 'AudKey': 'test@key', 'Expire': 50000000, 'uex1': 'tl', 'uex2': None, 'uex3': None,
+  'aex1': None, 'aex2': None, 'aex3': None}]
+mo = map(lambda x:x['Role'],list(ar))
+print(list(mo))

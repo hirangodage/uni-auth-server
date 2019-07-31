@@ -3,7 +3,7 @@ from flask_jwt_extended import  jwt_required
 from flask import Flask,jsonify,request,flash,redirect,send_file
 import logging
 
-health = Namespace('health', description='Service availability and health check')
+health = Namespace('health', description='Check service availability form here')
 logger = logging.getLogger('health')
 @health.route('/with-un-auth')
 class MainService(Resource):

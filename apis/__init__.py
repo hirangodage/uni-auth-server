@@ -2,6 +2,7 @@ from flask_restplus import Api
 from flask import url_for
 from apis.Health import health
 from apis.auth import auth
+from apis.admin import admin
 
 
 authorizations = {
@@ -23,9 +24,10 @@ class MyApi(Api):
 
 
 api = MyApi(version='1.0', title='Unicorn authantication API',
-    description='token server',
+    description='The Authentication API enables you to manage all aspects of user identity when you use any Unicorn product and services. It offers endpoints so your users can log in, sign up, log out, access APIs, and more.',
     authorizations=authorizations,
-    security='apikey'
+    security='apikey',
+    doc='/'
 )
 
 api.add_namespace(health)
@@ -33,3 +35,5 @@ api.add_namespace(health)
 
 
 api.add_namespace(auth)
+
+api.add_namespace(admin)

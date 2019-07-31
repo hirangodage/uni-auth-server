@@ -5,3 +5,4 @@ flask_jwt_extended==3.18.0
 pyjwt==1.7.1
 flask-restplus==0.12.1
 pyodbc== 4.0.26
+mysql-connector==2.2.9
