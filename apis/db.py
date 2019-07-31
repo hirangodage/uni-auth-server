@@ -15,7 +15,8 @@ def getAuthDB():
 
 
 def checkUser(username, password, aud):
-
+     conn= None
+     cursor=None
      try:
           conn = getAuthDB()
           
@@ -38,7 +39,8 @@ def checkUser(username, password, aud):
      return result
 
 def addUser(userObject):
-
+     conn= None
+     cursor=None
      try:
           conn = getAuthDB()
           

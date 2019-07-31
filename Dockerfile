@@ -8,7 +8,6 @@ RUN apt-get install -y tdsodbc unixodbc-dev --no-install-recommends apt-utils
 RUN apt install unixodbc-bin -y --no-install-recommends apt-utils
 RUN apt-get clean -y
 RUN pip install -r /var/auth-server/requirements.txt
-ENV auth_db_connection=""
 
 ENTRYPOINT python /var/auth-server/app.py
 EXPOSE 8083
