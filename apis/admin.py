@@ -34,7 +34,7 @@ class Users(Resource):
           try:
             reqdata =  request.get_json()
             rawjwt = get_raw_jwt()      
-            if 'admin' in rawjwt['roles'] and reqdata['clientid'] in rawjwt['aud']:
+            if 'admin' in rawjwt['roles'] and reqdata['clientid'] in rawjwt['uex1']:
                 
                 res = addUser(reqdata)
                 
