@@ -12,13 +12,13 @@ def getAuthDB():
 
 
 
-def getUser(clientid):
+def getUser(name):
      conn = getAuthDB()
           
      cursor = conn.cursor(dictionary=True)
      try:
          
-          cursor.callproc('uni_auth.core_getClientSecret',[clientid])
+          cursor.callproc('uni_auth.core_getUsers',[name])
           
           result = []
           for res in cursor.stored_results():
@@ -33,7 +33,7 @@ def getUser(clientid):
           conn.close()
           cursor.close()
      
-     return result[0]['AudKey']
+     return result[0]
 
 def getClientSecret(clientid):
      conn = getAuthDB()

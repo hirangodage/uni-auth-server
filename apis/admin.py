@@ -45,7 +45,8 @@ clientModel = admin.model('client',{
 
 
 logger = logging.getLogger('admin')
-@admin.route('/users')
+@admin.route('/users/')
+@admin.route('/users/<string:name>/' , methods=['GET'])
 class Users(Resource):
       @admin.expect(newUserModel,validate=True)
       @admin.doc(responses={
@@ -79,14 +80,20 @@ class Users(Resource):
           
 
           
-
+      @admin.doc(responses={
+            200: 'return list of users in user model',
+        401: 'Authentication Error',
+        403: 'Requested resource unavailable',
+        409: 'Conflict, document already exists',
+        422: 'Validation Error'
+                  })
       @jwt_required
-      def get(self):
+      def get(name=None):
             logger.info('get users')
-            return "working",200
-
+            return name,200
+@admin.route('/clients/<string:name>/' , methods=['GET'])
 @admin.route('/clients')
-class Users(Resource):
+class Clients(Resource):
       @admin.expect(clientModel,validate=True)
       @admin.doc(responses={
             200: 'Success',
@@ -116,7 +123,13 @@ class Users(Resource):
           
 
           
-
+      @admin.doc(responses={
+            200: clientModel,
+        401: 'Authentication Error',
+        403: 'Requested resource unavailable',
+        409: 'Conflict, document already exists',
+        422: 'Validation Error'
+                  })
       @jwt_required
       def get(self):
             logger.info('get client details')
