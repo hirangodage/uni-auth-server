@@ -7,3 +7,4 @@ web api template for python and flask with docker
 ###dbpassword - password for db user
 ###dbhost - host name for databse
 ###dbname - database name
+###tokenissuer - token issuer name. this will validate by resource server

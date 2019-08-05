@@ -1,5 +1,6 @@
 from flask import Flask,jsonify, request
 from apis.db import *
+from os import getenv
 from itertools import groupby
 from functools import reduce
 import operator
@@ -27,6 +28,7 @@ def get_access_token(identity,expin,aud,key,roles,uex1,uex2,uex3,aex1,aex2,aex3)
                         'exp': datetime.datetime.utcnow() + datetime.timedelta(milliseconds=expin),
                         'iat': datetime.datetime.utcnow(),
                         'nbf': datetime.datetime.utcnow(),
+                        'iss' : getenv('tokenissuer'),
                         'identity': identity,
                         'aud':[aud],
                         "type": "access",
