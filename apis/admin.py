@@ -124,7 +124,7 @@ class Clients(Resource):
 
           
       @admin.doc(responses={
-            200: clientModel,
+            200: 'success. server will return clientModel, as described in below section',
         401: 'Authentication Error',
         403: 'Requested resource unavailable',
         409: 'Conflict, document already exists',
