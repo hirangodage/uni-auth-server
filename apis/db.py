@@ -58,13 +58,13 @@ def getClientSecret(clientid):
      
      return result[0]['AudKey']
 
-def checkUser(username, password, aud):
+def checkUser(username, password, aud,tenant):
      conn = getAuthDB()
           
      cursor = conn.cursor(dictionary=True)
      try:
          
-          cursor.callproc('uni_auth.core_validateUser',[username, password, aud])
+          cursor.callproc('uni_auth.core_validateUser',[username, password, aud,tenant])
           
           result = []
           for res in cursor.stored_results():

@@ -19,11 +19,12 @@ auth = Namespace('oauth', description='List of end points that use to retrive ac
 tokenModel = auth.model('tokenRequest',{
     'username': fields.String(required=True, description='username'),
     'password': fields.String(required=True, description='password'),
-    'aud': fields.String(required=True, description='ClientID')
+    'aud': fields.String(required=True, description='ClientID'),
+    'tenant': fields.String(required=True, description='company name')
 })
 
 
-def get_access_token(identity,expin,aud,key,roles,uex1,uex2,uex3,aex1,aex2,aex3):
+def get_access_token(identity,expin,aud,key,roles,uex1,uex2,uex3,aex1,aex2,aex3,tenant):
     payload_access = {
                         'exp': datetime.datetime.utcnow() + datetime.timedelta(milliseconds=expin),
                         'iat': datetime.datetime.utcnow(),
@@ -31,6 +32,7 @@ def get_access_token(identity,expin,aud,key,roles,uex1,uex2,uex3,aex1,aex2,aex3)
                         'iss' : getenv('tokenissuer'),
                         'identity': identity,
                         'aud':[aud],
+                        'tenant':tenant,
                         "type": "access",
                         'roles':roles
                          }
@@ -82,9 +84,10 @@ class tokenServer(Resource):
             username =reqdata.get('username')
             password = reqdata.get('password')
             aud = reqdata.get('aud')
+            tenant = reqdata.get('tenant')
             logger.info(f'token request for user {username} and aud is {aud}')
 
-            userState = checkUser(username,password,aud)
+            userState = checkUser(username,password,aud,tenant)
             if not userState:
                 logger.info(f'invlaid aud for user {username}')
                 return {'message':'invalid audience'},404
@@ -126,7 +129,7 @@ class tokenServer(Resource):
                 aex3 = k[10]
 
             
-            access_token = get_access_token(username,expire,aud,audkey,roles,uex1,uex2,uex3,aex1,aex2,aex3)
+            access_token = get_access_token(username,expire,aud,audkey,roles,uex1,uex2,uex3,aex1,aex2,aex3,tenant)
             refresh_token =create_refresh_token(username)
             logger.info(f'token granted for user {username}')   
             return {'token_type': 'Bearer', 'expires_in': expire,'access_token': access_token, 
