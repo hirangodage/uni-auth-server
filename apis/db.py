@@ -81,17 +81,20 @@ def checkUser(username, password, aud,tenant):
     
      return result
 
-def addUser(userObject,in_conn=None):
-          if in_conn is None:
+def addUser(userObject,in_cur=None):
+          conn = None
+          cursor = None
+          if in_cur is None:
                conn = getAuthDB()
+               cursor = conn.cursor(dictionary=True)
           else:
-               conn = in_conn     
-          cursor = conn.cursor(dictionary=True)
+               #conn = in_conn     
+               cursor = in_cur
           try:
                
                cursor.callproc('uni_auth.core_addUser',[userObject['username'],userObject['password'],userObject['email'],
                userObject['mobile'],userObject['clientid'],
-               userObject['ex1'],userObject['ex2'],userObject['ex3']])
+               userObject['ex1'],userObject['ex2'],userObject['ex3'],userObject['tenant']])
 
                returnMsg=''
                returnStatus=1
@@ -101,7 +104,9 @@ def addUser(userObject,in_conn=None):
                     for row in res:
 
                          result.append(dict(zip(res.column_names,row)))
-               
+               if(result[0]['result']==1):
+                    returnMsg+='user added'
+                    returnStatus=1
                if(result[0]['result']==-1):
                     returnMsg+='user already exists'
                     returnStatus=-1
@@ -118,21 +123,22 @@ def addUser(userObject,in_conn=None):
 
                returnMsg+=',permission granted for the user'
                
-               if in_conn is None:
+               if in_cur is None:
                     conn.commit()
 
                return {'message':returnMsg,'status':returnStatus}
           except Exception as ex:
-               if in_conn is None:
+               if in_cur is None:
                     conn.rollback()
                raise ex
           finally:
-               if in_conn is None:
+               if in_cur is None:
+                    cursor.close()
                     conn.close()
-               cursor.close()
+               
      
     
-def addClient(clientObject):
+def addAud(clientObject):
      
           conn = getAuthDB()
                
@@ -157,14 +163,15 @@ def addClient(clientObject):
                if(result[0]['ID']==-1):
                     returnMsg+='client already exists'
                     returnStatus=-1
+                    conn.rollback()
                     return {'message':returnMsg,'status':returnStatus}
 
                
-               #add/create defult user
-               userobj = clientObject['adminUser']
-               userobj['clientid'] = clientObject['clientid']
-               userobj['roles'] = 'admin'
-               res = addUser(userobj,conn)
+               # #add/create defult user
+               # userobj = clientObject['adminUser']
+               # userobj['clientid'] = clientObject['clientid']
+               # userobj['roles'] = 'admin'
+               # res = addUser(userobj,conn)
 
                returnMsg+='new client added'
                
@@ -178,6 +185,60 @@ def addClient(clientObject):
           finally:
                conn.close()
                cursor.close()     
+
+
+def addClient(clientObject):
+     
+          conn = getAuthDB()
+               
+          cursor = conn.cursor(dictionary=True)
+          try:
+               
+               cursor.callproc('uni_auth.core_addtenant',[clientObject['name'],clientObject['des']
+               
+              ,clientObject['ex1'],clientObject['ex2'],clientObject['ex3']])
+
+               returnMsg=''
+               returnStatus=1
+               result = []
+               result2 =[]
+               for res in cursor.stored_results():
+                    for row in res:
+
+                         result.append(dict(zip(res.column_names,row)))
+               
+               #add auds to the company
+               for auditem in clientObject['aud'].split(','):
+                    cursor.callproc('uni_auth.core_addaudtotenant',[auditem,clientObject['name']])
+
+               
+               if(result[0]['ID']==-1):
+                    returnMsg+='client already exists. audiences updated.'
+                    returnStatus=-1
+                    conn.commit()
+                    return {'message':returnMsg,'status':returnStatus}
+               
+               
+               #add/create defult user
+               userobj = clientObject['adminUser']
+               userobj['clientid'] = 'admin'
+               userobj['tenant'] = clientObject['name']
+               userobj['roles'] = 'tenant'
+               res = addUser(userobj,cursor)
+               returnMsg+=res['message']
+
+               returnMsg+=',new client added'
+               
+
+               conn.commit()
+
+               return {'message':returnMsg,'status':returnStatus}
+          except Exception as ex:
+               conn.rollback()
+               raise ex
+          finally:
+               conn.close()
+               cursor.close()   
 
 
 

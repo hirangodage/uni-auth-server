@@ -26,6 +26,7 @@ newUserModel = admin.model('user',{
     'password': fields.String(required=True, description='password'),
     'clientid': fields.String(required=True, description='client id or aud. this field is valid only for super admin'),
     'roles': fields.String(required=True, description='comma separated role list'),
+    'tenant': fields.String(required=True, description='tenant name , valid only for super admin'),
     'email': fields.String(required=False, description='email address'),
     'mobile': fields.String(required=False, description='mobile number'),
     'ex1': fields.String(required=False, description='extended filed'),
@@ -34,10 +35,20 @@ newUserModel = admin.model('user',{
 })
 
 clientModel = admin.model('client',{
-    'clientid': fields.String(required=True, description='client name'),
-    'clientSecret': fields.String(required=True, description='clainr password'),
-    'Expire': fields.String(required=True, description='token expire in - ms'),
+    'name': fields.String(required=True, description='tenant name'),
+    'des': fields.String(required=True, description='description'),
+    'aud':fields.String(required=True, description='comma separated list of audiances'),
     'adminUser':fields.Nested(newUserModel,required=True, description='default admin user'),
+    'ex1': fields.String(required=False, description='extended filed'),
+    'ex2': fields.String(required=False, description='extended filed'),
+    'ex3': fields.String(required=False, description='extended filed')
+})
+
+audModel = admin.model('aud',{
+    'clientid': fields.String(required=True, description='client name'),
+    'clientSecret': fields.String(required=True, description='client password'),
+    'Expire': fields.String(required=True, description='token expire in - ms'),
+    
     'ex1': fields.String(required=False, description='extended filed'),
     'ex2': fields.String(required=False, description='extended filed'),
     'ex3': fields.String(required=False, description='extended filed')
@@ -61,10 +72,15 @@ class Users(Resource):
           try:
             reqdata =  request.get_json()
             rawjwt = get_raw_jwt()      
-            if 'admin' not in rawjwt['aud']:#when aud admin is authanticated (only super admin can add users into any aud)
+            if 'admin' not in rawjwt['aud']:#when aud admin is authanticated (only super admin can add users into any tenant/aud)
                 reqdata['clientid'] = rawjwt['aud'][0]
+                reqdata['tenant'] = rawjwt['tenant'][0]
+
+            if 'admin' in rawjwt['aud'] and 'tenant' in rawjwt['roles']:# tenant admin can add users to any aud
+                print(rawjwt['tenant'][0])
+                reqdata['tenant'] = rawjwt['tenant']
                 
-            if 'admin' in rawjwt['roles']:  #only admins can add users  
+            if 'admin' in rawjwt['roles'] or 'tenant' in rawjwt['roles']:  #only admins can add users  
                 res = addUser(reqdata)
                     
                 return  res, 200
