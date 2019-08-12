@@ -17,7 +17,7 @@ def getUser(name,aud,tenant):
           
      cursor = conn.cursor(dictionary=True)
      try:
-          print(name)
+          
           cursor.callproc('uni_auth.core_getUsers',[name,aud,tenant])
           
           result = []
@@ -33,7 +33,7 @@ def getUser(name,aud,tenant):
           conn.close()
           cursor.close()
      
-     return result[0]
+     return result
 
 def getClientSecret(clientid):
      conn = getAuthDB()

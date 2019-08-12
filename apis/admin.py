@@ -1,7 +1,7 @@
 from flask_restplus import Namespace, Resource, fields
 from flask_jwt_extended import  jwt_required, get_raw_jwt
 from flask import Flask,jsonify,request,flash,redirect,send_file
-import logging
+import logging,json
 from apis.db import *
 admin = Namespace('admin', description='Add/remove users and other user account and audience management endpoints')
 
@@ -104,20 +104,21 @@ class Users(Resource):
         422: 'Validation Error'
                   })
       @jwt_required
-      def get():
+      def get(self,username=''):
           try:
-            print(request.args.get('username'))
+           
             rawjwt = get_raw_jwt()
-            logger.info('get users')
+            logger.info('get users '+username)
             tenant=rawjwt['tenant']
             aud=rawjwt['aud'][0]
             if(rawjwt['tenant']=='admin'):
                 tenant=''
                 aud=''
             users=getUser(username,aud,tenant)
+           
 
 
-            return users,200
+            return json.dumps(users, sort_keys=True, default=str),200
           except Exception as e:
               logger.error(e)
               return  {"msg": "Internal server error"}, 500
@@ -162,7 +163,7 @@ class Clients(Resource):
         422: 'Validation Error'
                   })
       @jwt_required
-      def get(name):
+      def get(self,name):
             try:
                 reqdata =  request.get_json()
                 rawjwt = get_raw_jwt()      
@@ -170,7 +171,7 @@ class Clients(Resource):
                     
                     res = getClients(name)
                     
-                    return  res, 200
+                    return  json.dumps(res, sort_keys=True, default=str), 200
 
                 else:
                     return  {"msg": "Forbidden"}, 403
