@@ -12,13 +12,13 @@ def getAuthDB():
 
 
 
-def getUser(name):
+def getUser(name,aud,tenant):
      conn = getAuthDB()
           
      cursor = conn.cursor(dictionary=True)
      try:
-         
-          cursor.callproc('uni_auth.core_getUsers',[name])
+          print(name)
+          cursor.callproc('uni_auth.core_getUsers',[name,aud,tenant])
           
           result = []
           for res in cursor.stored_results():
@@ -240,6 +240,28 @@ def addClient(clientObject):
                conn.close()
                cursor.close()   
 
+def getClients(name):
+     conn = getAuthDB()
+          
+     cursor = conn.cursor(dictionary=True)
+     try:
+         
+          cursor.callproc('uni_auth.core_getClients',[name])
+          
+          result = []
+          for res in cursor.stored_results():
+               for row in res:
+
+                    result.append(dict(zip(res.column_names,row)))
+          conn.commit()
+     except Exception as ex:
+          conn.rollback()
+          raise ex
+     finally:
+          conn.close()
+          cursor.close()
+     
+     return result[0]
 
 
 
