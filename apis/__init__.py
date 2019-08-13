@@ -23,7 +23,7 @@ class MyApi(Api):
 
 
 
-api = MyApi(version='1.0', title='Unicorn authantication API',
+api = MyApi(version='1.0', title='Unicorn authorization API',
     description='The Authentication API enables you to manage all aspects of user identity when you use any Unicorn product and services. It offers endpoints so your users can log in, sign up, log out, access APIs, and more.',
     authorizations=authorizations,
     security='apikey',
