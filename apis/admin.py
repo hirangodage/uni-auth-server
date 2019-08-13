@@ -163,7 +163,7 @@ class Clients(Resource):
         422: 'Validation Error'
                   })
       @jwt_required
-      def get(self,name):
+      def get(self,name=''):
             try:
                 reqdata =  request.get_json()
                 rawjwt = get_raw_jwt()      
