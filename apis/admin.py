@@ -1,9 +1,10 @@
-from flask_restplus import Namespace, Resource, fields
+from flask_restplus import Namespace, Resource, fields,marshal_with
 from flask_jwt_extended import  jwt_required, get_raw_jwt
 from flask import Flask,jsonify,request,flash,redirect,send_file
 import logging,json
 from apis.db import *
-admin = Namespace('admin', description='Add/remove users and other user account and audience management endpoints')
+from apis.models import user
+admin = Namespace('admin',ordered=False, description='Add/remove users and other user account and audience management endpoints')
 
 
     
@@ -21,38 +22,11 @@ admin = Namespace('admin', description='Add/remove users and other user account 
 #     return wrapper
 
 
-newUserModel = admin.model('user',{
-    'username': fields.String(required=True, description='username'),
-    'password': fields.String(required=True, description='password'),
-    'clientid': fields.String(required=True, description='client id or aud. this field is valid only for super admin'),
-    'roles': fields.String(required=True, description='comma separated role list'),
-    'tenant': fields.String(required=True, description='tenant name , valid only for super admin'),
-    'email': fields.String(required=False, description='email address'),
-    'mobile': fields.String(required=False, description='mobile number'),
-    'ex1': fields.String(required=False, description='extended filed'),
-    'ex2': fields.String(required=False, description='extended filed'),
-    'ex3': fields.String(required=False, description='extended filed')
-})
+newUserModel = user.newUserModel(admin); # admin.model('user',user.fulluser)
 
-clientModel = admin.model('client',{
-    'name': fields.String(required=True, description='tenant name'),
-    'des': fields.String(required=True, description='description'),
-    'aud':fields.String(required=True, description='comma separated list of audiances'),
-    'adminUser':fields.Nested(newUserModel,required=True, description='default admin user'),
-    'ex1': fields.String(required=False, description='extended filed'),
-    'ex2': fields.String(required=False, description='extended filed'),
-    'ex3': fields.String(required=False, description='extended filed')
-})
+clientModel = admin.model('client',user.client)
 
-audModel = admin.model('aud',{
-    'clientid': fields.String(required=True, description='client name'),
-    'clientSecret': fields.String(required=True, description='client password'),
-    'Expire': fields.String(required=True, description='token expire in - ms'),
-    
-    'ex1': fields.String(required=False, description='extended filed'),
-    'ex2': fields.String(required=False, description='extended filed'),
-    'ex3': fields.String(required=False, description='extended filed')
-})
+audModel = admin.model('aud',user.aud)
 
 
 logger = logging.getLogger('admin')
@@ -171,7 +145,7 @@ class Clients(Resource):
                     
                     res = getClients(name)
                     
-                    return  json.dumps(res, sort_keys=True, default=str), 200
+                    return  json.dumps({'clients':res}, sort_keys=True, default=str), 200
 
                 else:
                     return  {"msg": "Forbidden"}, 403
