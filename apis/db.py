@@ -261,7 +261,7 @@ def getClients(name):
           conn.close()
           cursor.close()
      
-     return result[0]
+     return result
 
 
 
