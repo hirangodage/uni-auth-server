@@ -24,7 +24,7 @@ admin = Namespace('admin',ordered=False, description='Add/remove users and other
 
 newUserModel = user.newUserModel(admin); # admin.model('user',user.fulluser)
 
-clientModel = admin.model('client',user.client)
+clientModel = user.newClientModel(admin);
 
 audModel = admin.model('aud',user.aud)
 
@@ -145,7 +145,7 @@ class Clients(Resource):
                     
                     res = getClients(name)
                     
-                    return  json.dumps({'clients':res}, sort_keys=True, default=str), 200
+                    return  json.dumps(res, sort_keys=True, default=str), 200
 
                 else:
                     return  {"msg": "Forbidden"}, 403
