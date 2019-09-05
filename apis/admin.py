@@ -92,7 +92,7 @@ class Users(Resource):
            
 
 
-            return json.dumps(users, sort_keys=True, default=str),200
+            return {'users':json.dumps(users, sort_keys=True, default=str)},200
           except Exception as e:
               logger.error(e)
               return  {"msg": "Internal server error"}, 500
