@@ -1,6 +1,6 @@
 from flask_restplus import Namespace, Resource, fields,marshal_with
 from flask_jwt_extended import  jwt_required, get_raw_jwt
-from flask import Flask,jsonify,request,flash,redirect,send_file
+from flask import Flask,jsonify,request,flash,redirect,send_file,Response
 import logging,json
 from apis.db import *
 from apis.models import user
@@ -92,7 +92,7 @@ class Users(Resource):
            
 
 
-            return {'users':json.dumps(users, sort_keys=True, default=str)},200
+            return Response(json.dumps(users, sort_keys=True, default=str),  mimetype='application/json') # {'users':json.parse(json.dumps(users, sort_keys=True, default=str))},200
           except Exception as e:
               logger.error(e)
               return  {"msg": "Internal server error"}, 500
@@ -145,7 +145,7 @@ class Clients(Resource):
                     
                     res = getClients(name)
                     
-                    return  json.dumps(res, sort_keys=True, default=str), 200
+                    return  Response(json.dumps(res, sort_keys=True, default=str),  mimetype='application/json')
 
                 else:
                     return  {"msg": "Forbidden"}, 403
